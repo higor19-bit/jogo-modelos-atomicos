@@ -1,0 +1,1200 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Jogos de Modelos Atômicos - IFMT</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;700;800&family=Fira+Code:wght@400;600&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Plus Jakarta Sans', 'sans-serif'],
+                        code: ['Fira Code', 'monospace'],
+                    },
+                    colors: {
+                        brand: {
+                            50: '#f0fdf4',
+                            100: '#dcfce7',
+                            200: '#bbf7d0',
+                            300: '#86efac',
+                            400: '#4ade80',
+                            500: '#22c55e',
+                            600: '#16a34a',
+                            700: '#15803d',
+                            800: '#166534',
+                            900: '#14532d',
+                            dark: '#081c15',
+                            card: '#1b4332',
+                            accent: '#52b788',
+                            light: '#d8f3dc'
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body {
+            background-color: #081c15;
+            color: #f0fdf4;
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            overflow-x: hidden;
+        }
+        .glow-effect {
+            box-shadow: 0 0 25px rgba(82, 183, 136, 0.25);
+        }
+        .glow-hover:hover {
+            box-shadow: 0 0 30px rgba(82, 183, 136, 0.4);
+            transform: translateY(-2px);
+        }
+        .glass-panel {
+            background: rgba(27, 67, 50, 0.75);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(82, 183, 136, 0.2);
+        }
+        /* Custom animations */
+        @keyframes orbit {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+        .animate-orbit {
+            animation: orbit 6s linear infinite;
+        }
+        .animate-orbit-reverse {
+            animation: orbit 8s linear infinite reverse;
+        }
+        @keyframes pulse-slow {
+            0%, 100% { opacity: 0.3; transform: scale(1); }
+            50% { opacity: 0.8; transform: scale(1.05); }
+        }
+        .animate-pulse-slow {
+            animation: pulse-slow 3s ease-in-out infinite;
+        }
+        /* Smooth state transitions */
+        .page-transition {
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .hide-screen {
+            opacity: 0;
+            pointer-events: none;
+            position: absolute;
+            transform: scale(0.96);
+            width: 100%;
+        }
+        .show-screen {
+            opacity: 1;
+            pointer-events: auto;
+            position: relative;
+            transform: scale(1);
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col justify-between selection:bg-brand-400 selection:text-brand-dark">
+
+    <!-- Header Navegação/Status -->
+    <header class="w-full border-b border-brand-accent/20 bg-brand-dark/80 backdrop-blur sticky top-0 z-50 px-4 py-3">
+        <div class="max-w-6xl mx-auto flex justify-between items-center">
+            <div class="flex items-center gap-3">
+                <div class="w-9 h-9 rounded-xl bg-brand-accent/20 border border-brand-accent flex items-center justify-center text-brand-400 font-bold text-lg">
+                    ⚛️
+                </div>
+                <div>
+                    <h1 class="text-base font-bold text-brand-light leading-none">Modelos Atômicos</h1>
+                    <p class="text-xs text-brand-300/70">Química Interativa</p>
+                </div>
+            </div>
+
+            <!-- Dashboard de Status do Jogo (Visível no Jogo) -->
+            <div id="game-dashboard" class="hidden flex items-center gap-4 sm:gap-6">
+                <div class="flex items-center gap-2">
+                    <span class="text-xs text-gray-400 font-semibold uppercase tracking-wider">Pontos:</span>
+                    <span id="score-display" class="font-code font-bold text-lg text-brand-300">0</span>
+                </div>
+                <div class="flex items-center gap-2">
+                    <span class="text-xs text-gray-400 font-semibold uppercase tracking-wider">Nível:</span>
+                    <span id="level-display" class="font-code font-bold text-lg text-brand-400">1/10</span>
+                </div>
+                <button id="audio-toggle" onclick="toggleAudio()" class="p-2 rounded-lg bg-brand-card hover:bg-brand-accent/20 text-brand-light border border-brand-accent/30 transition">
+                    🔊
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <main class="max-w-5xl mx-auto w-full px-4 py-6 flex-grow flex items-center justify-center relative">
+
+        <!-- TELA 1: CAPA INICIAL -->
+        <section id="screen-cover" class="page-transition show-screen w-full text-center">
+            <div class="glass-panel p-8 sm:p-12 rounded-3xl max-w-3xl mx-auto glow-effect border border-brand-accent/30">
+                <div class="inline-block p-4 rounded-full bg-brand-accent/10 border border-brand-accent/30 mb-6 animate-pulse-slow">
+                    <svg class="w-20 h-20 text-brand-400" viewBox="0 0 100 100" fill="none">
+                        <circle cx="50" cy="50" r="8" fill="currentColor"/>
+                        <ellipse cx="50" cy="50" rx="35" ry="12" stroke="currentColor" stroke-width="2.5" transform="rotate(0 50 50)"/>
+                        <ellipse cx="50" cy="50" rx="35" ry="12" stroke="currentColor" stroke-width="2.5" transform="rotate(60 50 50)"/>
+                        <ellipse cx="50" cy="50" rx="35" ry="12" stroke="currentColor" stroke-width="2.5" transform="rotate(120 50 50)"/>
+                    </svg>
+                </div>
+
+                <h1 class="text-3xl sm:text-5xl font-extrabold tracking-tight text-white mb-3">
+                    Jogos de <span class="text-transparent bg-clip-text bg-gradient-to-r from-brand-300 to-brand-500">Modelos Atômicos</span>
+                </h1>
+                
+                <p class="text-lg text-brand-light/90 mb-8 max-w-xl mx-auto">
+                    Explore a fascinante evolução da estrutura atômica através de desafios interativos, visualizações e testes de conhecimento.
+                </p>
+
+                <!-- Informações do Autor e Instituição -->
+                <div class="bg-brand-dark/60 rounded-2xl p-5 mb-8 border border-brand-accent/20 text-left sm:text-center max-w-xl mx-auto">
+                    <div class="text-sm text-brand-300 font-semibold mb-1">👨‍💻 Desenvolvido por:</div>
+                    <div class="text-base text-white font-bold mb-3">Higor Harlley Flexa da Penha</div>
+                    <div class="text-xs text-gray-400 font-semibold uppercase tracking-wider mb-1">🏛️ Instituição:</div>
+                    <div class="text-sm text-brand-light/90">Instituto Federal de Mato Grosso (IFMT)</div>
+                    <div class="text-xs text-brand-accent font-medium">Campus Primavera do Leste</div>
+                </div>
+
+                <!-- Ações -->
+                <div class="flex flex-col sm:flex-row gap-4 justify-center items-center">
+                    <button onclick="startIntro()" class="w-full sm:w-auto px-8 py-4 bg-gradient-to-r from-brand-500 to-brand-600 hover:from-brand-400 hover:to-brand-500 text-brand-dark font-extrabold rounded-xl shadow-lg glow-hover transition-all text-lg flex items-center justify-center gap-2">
+                        🚀 Iniciar Jogo
+                        <span class="text-xs px-2 py-1 bg-brand-dark/20 rounded font-normal text-brand-dark">ou Pressione Enter</span>
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <!-- TELA 2: INTRODUÇÃO / RESUMO INTERATIVO -->
+        <section id="screen-intro" class="page-transition hide-screen w-full">
+            <div class="glass-panel p-6 sm:p-8 rounded-3xl max-w-4xl mx-auto">
+                
+                <!-- Indicador de Passos -->
+                <div class="flex justify-between items-center mb-6 border-b border-brand-accent/20 pb-4">
+                    <div>
+                        <span id="intro-step-badge" class="text-xs font-bold text-brand-400 uppercase tracking-widest bg-brand-accent/20 px-3 py-1 rounded-full border border-brand-accent/30">
+                            Modelo 1 de 5
+                        </span>
+                        <h2 id="intro-title" class="text-2xl sm:text-3xl font-extrabold text-white mt-2">
+                            John Dalton (1803)
+                        </h2>
+                    </div>
+                    <div class="text-right">
+                        <span class="text-xs text-gray-400">Progresso do Resumo</span>
+                        <div class="flex gap-1.5 mt-1" id="intro-dots">
+                            <!-- Gerado Dinamicamente -->
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Conteúdo do Slide -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 items-center my-4">
+                    <!-- Ilustração SVG Interativa -->
+                    <div id="intro-svg-container" class="bg-brand-dark/80 rounded-2xl p-6 h-64 sm:h-72 flex items-center justify-center border border-brand-accent/30 relative overflow-hidden">
+                        <!-- O SVG é inserido via JavaScript -->
+                    </div>
+
+                    <!-- Texto Informativo -->
+                    <div class="space-y-4">
+                        <div class="bg-brand-dark/40 p-4 rounded-xl border border-brand-accent/10">
+                            <h3 class="text-xs font-bold text-brand-400 uppercase tracking-wider mb-1">Apelido / Conceito Chave</h3>
+                            <p id="intro-nickname" class="text-lg font-bold text-brand-light">"Modelo da Bola de Bilhar"</p>
+                        </div>
+
+                        <div class="space-y-2">
+                            <h3 class="text-xs font-bold text-brand-400 uppercase tracking-wider">Principais Postulados:</h3>
+                            <p id="intro-description" class="text-sm text-gray-200 leading-relaxed">
+                                O átomo é uma esfera maciça, indivisível, indestrutível e sem carga elétrica. Elementos iguais possuem átomos idênticos.
+                            </p>
+                        </div>
+
+                        <div class="p-3 bg-brand-accent/10 rounded-lg border border-brand-accent/20 text-xs text-brand-300">
+                            💡 <strong>Importância Histórica:</strong> <span id="intro-importance">Primeira base científica moderna para a teoria atômica após os filósofos gregos.</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Botões de Navegação -->
+                <div class="flex justify-between items-center mt-6 pt-4 border-t border-brand-accent/20">
+                    <button id="intro-prev-btn" onclick="prevIntroSlide()" class="px-5 py-2.5 rounded-xl bg-brand-dark hover:bg-brand-card text-brand-light text-sm font-semibold border border-brand-accent/30 transition disabled:opacity-40">
+                        ← Anterior
+                    </button>
+                    <button id="intro-next-btn" onclick="nextIntroSlide()" class="px-6 py-2.5 rounded-xl bg-brand-500 hover:bg-brand-400 text-brand-dark font-extrabold text-sm shadow glow-hover transition">
+                        Próximo →
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <!-- TELA 3: ÁREA DO JOGO (10 NÍVEIS) -->
+        <section id="screen-game" class="page-transition hide-screen w-full">
+            <div class="glass-panel p-6 sm:p-8 rounded-3xl max-w-4xl mx-auto relative">
+                
+                <!-- Barra de Progresso do Nível -->
+                <div class="w-full bg-brand-dark/80 rounded-full h-2.5 mb-6 overflow-hidden border border-brand-accent/20">
+                    <div id="level-progress-bar" class="bg-gradient-to-r from-brand-500 to-brand-300 h-2.5 rounded-full transition-all duration-500" style="width: 10%"></div>
+                </div>
+
+                <!-- Cabecalho do Nível Atual -->
+                <div class="mb-6 flex flex-col sm:flex-row justify-between sm:items-center gap-2 border-b border-brand-accent/20 pb-4">
+                    <div>
+                        <span id="game-level-category" class="text-xs font-bold text-brand-400 uppercase tracking-widest">
+                            Nível 1: Associação Inicial
+                        </span>
+                        <h2 id="game-level-title" class="text-xl sm:text-2xl font-bold text-white mt-1">
+                            Relacione Cientista e Conceito
+                        </h2>
+                    </div>
+                    <div id="game-level-type-tag" class="text-xs bg-brand-dark/80 border border-brand-accent/30 text-brand-300 px-3 py-1 rounded-full w-fit">
+                        🧩 Drag & Drop / Seleção
+                    </div>
+                </div>
+
+                <!-- Área Interativa do Nível (Dinâmico) -->
+                <div id="level-container" class="min-h-[300px] flex flex-col justify-center">
+                    <!-- O conteúdo interativo do nível específico será injetado aqui pelo JS -->
+                </div>
+
+                <!-- Painel de Feedback e Explicação Pedagógica (Escondido por padrão) -->
+                <div id="feedback-panel" class="hidden mt-6 p-4 rounded-2xl border transition-all">
+                    <div class="flex items-start gap-3">
+                        <div id="feedback-icon" class="text-2xl"></div>
+                        <div class="flex-grow">
+                            <h4 id="feedback-title" class="font-bold text-base"></h4>
+                            <p id="feedback-text" class="text-sm mt-1 text-gray-200 leading-relaxed"></p>
+                        </div>
+                    </div>
+                    <div class="mt-4 flex justify-end">
+                        <button id="next-level-btn" onclick="advanceLevel()" class="px-6 py-2.5 bg-brand-500 hover:bg-brand-400 text-brand-dark font-extrabold rounded-xl shadow glow-hover transition text-sm">
+                            Continuar para o Próximo Nível →
+                        </button>
+                    </div>
+                </div>
+
+            </div>
+        </section>
+
+        <!-- TELA 4: VITÓRIA E RANKING FINAL -->
+        <section id="screen-victory" class="page-transition hide-screen w-full text-center">
+            <div class="glass-panel p-8 sm:p-12 rounded-3xl max-w-2xl mx-auto glow-effect border border-brand-accent/30">
+                <div class="text-6xl mb-4 animate-bounce">🏆</div>
+                <h2 class="text-3xl sm:text-4xl font-extrabold text-white mb-2">Parabéns, Cientista!</h2>
+                <p class="text-brand-light/90 text-sm sm:text-base mb-6">
+                    Você concluiu todos os 10 níveis do Desafio de Modelos Atômicos!
+                </p>
+
+                <!-- Card de Desempenho -->
+                <div class="bg-brand-dark/70 rounded-2xl p-6 mb-8 border border-brand-accent/30">
+                    <div class="text-xs text-gray-400 font-semibold uppercase tracking-wider mb-1">Seu Título Científico</div>
+                    <div id="final-rank" class="text-2xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-brand-300 to-brand-500 mb-4">
+                        Mestre da Química Atômica
+                    </div>
+
+                    <div class="grid grid-cols-2 gap-4 border-t border-brand-accent/20 pt-4">
+                        <div>
+                            <span class="text-xs text-gray-400 block">Pontuação Final</span>
+                            <span id="final-score" class="font-code text-2xl font-bold text-brand-300">1000</span>
+                        </div>
+                        <div>
+                            <span class="text-xs text-gray-400 block">Precisão</span>
+                            <span id="final-accuracy" class="font-code text-2xl font-bold text-brand-400">100%</span>
+                        </div>
+                    </div>
+                </div>
+
+                <button onclick="restartGame()" class="px-8 py-3.5 bg-brand-500 hover:bg-brand-400 text-brand-dark font-extrabold rounded-xl shadow-lg glow-hover transition text-base">
+                    🔄 Jogar Novamente
+                </button>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- Rodapé -->
+    <footer class="w-full border-t border-brand-accent/10 bg-brand-dark/50 py-3 text-center text-xs text-gray-500">
+        <p>IFMT - Campus Primavera do Leste • Aula de Química • Desenvolvido por Higor Harlley Flexa da Penha</p>
+    </footer>
+
+    <script>
+        /* -------------------------------------------------------------------------- */
+        /* AUDIO SYSTEM (Web Audio API - Sem Arquivos Externos)                       */
+        /* -------------------------------------------------------------------------- */
+        let audioEnabled = true;
+        const AudioCtx = window.AudioContext || window.webkitAudioContext;
+        let audioCtx = null;
+
+        function initAudio() {
+            if (!audioCtx) audioCtx = new AudioCtx();
+        }
+
+        function playSound(type) {
+            if (!audioEnabled) return;
+            initAudio();
+
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            osc.connect(gain);
+            gain.connect(audioCtx.destination);
+
+            const now = audioCtx.currentTime;
+
+            if (type === 'correct') {
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(523.25, now); // C5
+                osc.frequency.exponentialRampToValueAtTime(659.25, now + 0.15); // E5
+                gain.gain.setValueAtTime(0.2, now);
+                gain.gain.exponentialRampToValueAtTime(0.01, now + 0.3);
+                osc.start(now);
+                osc.stop(now + 0.3);
+            } else if (type === 'wrong') {
+                osc.type = 'sawtooth';
+                osc.frequency.setValueAtTime(180, now);
+                osc.frequency.exponentialRampToValueAtTime(110, now + 0.2);
+                gain.gain.setValueAtTime(0.2, now);
+                gain.gain.exponentialRampToValueAtTime(0.01, now + 0.25);
+                osc.start(now);
+                osc.stop(now + 0.25);
+            } else if (type === 'click') {
+                osc.type = 'triangle';
+                osc.frequency.setValueAtTime(400, now);
+                gain.gain.setValueAtTime(0.05, now);
+                gain.gain.exponentialRampToValueAtTime(0.001, now + 0.05);
+                osc.start(now);
+                osc.stop(now + 0.05);
+            } else if (type === 'win') {
+                const notes = [523.25, 659.25, 783.99, 1046.50];
+                notes.forEach((freq, idx) => {
+                    const subOsc = audioCtx.createOscillator();
+                    const subGain = audioCtx.createGain();
+                    subOsc.connect(subGain);
+                    subGain.connect(audioCtx.destination);
+                    subOsc.frequency.setValueAtTime(freq, now + idx * 0.12);
+                    subGain.gain.setValueAtTime(0.2, now + idx * 0.12);
+                    subGain.gain.exponentialRampToValueAtTime(0.01, now + idx * 0.12 + 0.3);
+                    subOsc.start(now + idx * 0.12);
+                    subOsc.stop(now + idx * 0.12 + 0.3);
+                });
+            }
+        }
+
+        function toggleAudio() {
+            audioEnabled = !audioEnabled;
+            document.getElementById('audio-toggle').innerText = audioEnabled ? '🔊' : '🔇';
+        }
+
+        /* -------------------------------------------------------------------------- */
+        /* DADOS DA INTRODUÇÃO / RESUMO (SLIDES COM SVGs DINÂMICOS)                   */
+        /* -------------------------------------------------------------------------- */
+        const introData = [
+            {
+                title: "John Dalton (1803)",
+                nickname: '"Modelo da Bola de Bilhar"',
+                description: "O átomo é imaginado como uma esfera maciça, indivisível, indestrutível e sem carga elétrica. Todos os átomos de um mesmo elemento químico são exatamente iguais.",
+                importance: "Primeira teoria atômica moderna com embasamento em leis ponderais (Lavoisier e Proust).",
+                svg: `
+                    <svg class="w-40 h-40" viewBox="0 0 100 100">
+                        <defs>
+                            <radialGradient id="daltonGrad" cx="30%" cy="30%" r="70%">
+                                <stop offset="0%" stop-color="#86efac" />
+                                <stop offset="50%" stop-color="#16a34a" />
+                                <stop offset="100%" stop-color="#052e16" />
+                            </radialGradient>
+                        </defs>
+                        <circle cx="50" cy="50" r="40" fill="url(#daltonGrad)" stroke="#52b788" stroke-width="2"/>
+                    </svg>
+                `
+            },
+            {
+                title: "J.J. Thomson (1897)",
+                nickname: '"Modelo do Pudim de Passas"',
+                description: "Com a descoberta do elétron através do experimento com raios catódicos, Thomson provou que o átomo é divisível! É uma esfera de carga positiva recheada com elétrons de carga negativa.",
+                importance: "Introduziu a natureza elétrica da matéria e as partículas subatômicas.",
+                svg: `
+                    <svg class="w-40 h-40" viewBox="0 0 100 100">
+                        <circle cx="50" cy="50" r="40" fill="#2d6a4f" opacity="0.8" stroke="#52b788" stroke-width="2"/>
+                        <!-- Cargas Positivas no Fundo -->
+                        <text x="50" y="55" font-size="30" fill="#86efac" text-anchor="middle" opacity="0.3">+</text>
+                        <!-- Elétrons encrostados -->
+                        <circle cx="35" cy="35" r="5" fill="#ef4444"/><text x="35" y="38" font-size="8" fill="#fff" text-anchor="middle" font-weight="bold">-</text>
+                        <circle cx="65" cy="40" r="5" fill="#ef4444"/><text x="65" y="43" font-size="8" fill="#fff" text-anchor="middle" font-weight="bold">-</text>
+                        <circle cx="45" cy="65" r="5" fill="#ef4444"/><text x="45" y="68" font-size="8" fill="#fff" text-anchor="middle" font-weight="bold">-</text>
+                        <circle cx="60" cy="65" r="5" fill="#ef4444"/><text x="60" y="68" font-size="8" fill="#fff" text-anchor="middle" font-weight="bold">-</text>
+                    </svg>
+                `
+            },
+            {
+                title: "Ernest Rutherford (1911)",
+                nickname: '"Modelo Planetário / Lâmina de Ouro"',
+                description: "Após bombardear uma fina lâmina de ouro com partículas alfa, descobriu que o átomo é em sua maioria espaço vazio! Possui um núcleo denso e positivo, com elétrons girando na eletrosfera.",
+                importance: "Desfez a ideia de átomo maciço e definiu o núcleo denso e a eletrosfera.",
+                svg: `
+                    <svg class="w-40 h-40" viewBox="0 0 100 100">
+                        <ellipse cx="50" cy="50" rx="38" ry="12" stroke="#52b788" stroke-width="1.5" fill="none" transform="rotate(0 50 50)"/>
+                        <ellipse cx="50" cy="50" rx="38" ry="12" stroke="#52b788" stroke-width="1.5" fill="none" transform="rotate(60 50 50)"/>
+                        <ellipse cx="50" cy="50" rx="38" ry="12" stroke="#52b788" stroke-width="1.5" fill="none" transform="rotate(120 50 50)"/>
+                        <!-- Núcleo -->
+                        <circle cx="50" cy="50" r="7" fill="#ef4444"/>
+                        <!-- Elétrons -->
+                        <circle cx="88" cy="50" r="3.5" fill="#4ade80"/>
+                        <circle cx="31" cy="20" r="3.5" fill="#4ade80"/>
+                    </svg>
+                `
+            },
+            {
+                title: "Niels Bohr (1913)",
+                nickname: '"Modelo das Órbitas Quantizadas"',
+                description: "Aprimorou Rutherford resolvendo o colapso do elétron. Os elétrons giram em órbitas circulares com níveis discretos de energia. Ao ganhar energia, o elétron salta para um nível externo; ao voltar, emite luz (fóton).",
+                importance: "Explicou os espectros de emissão atômica e o funcionamento dos fogos de artifício.",
+                svg: `
+                    <svg class="w-40 h-40" viewBox="0 0 100 100">
+                        <circle cx="50" cy="50" r="8" fill="#ef4444"/>
+                        <circle cx="50" cy="50" r="20" stroke="#52b788" stroke-dasharray="2,2" stroke-width="1.5" fill="none"/>
+                        <circle cx="50" cy="50" r="34" stroke="#86efac" stroke-width="1.5" fill="none"/>
+                        <!-- Salto e emissão de fóton -->
+                        <circle cx="50" cy="16" r="4" fill="#facc15"/>
+                        <path d="M 50 20 Q 55 25 50 30" stroke="#facc15" stroke-width="2" fill="none"/>
+                    </svg>
+                `
+            },
+            {
+                title: "Schrödinger / Sommerfeld (Modelo Quântico)",
+                nickname: '"Modelo da Nuvem Eletrônica / Orbitais"',
+                description: "Abandonou a ideia de trajetórias exatas. Baseado no Princípio da Incerteza de Heisenberg e na dualidade onda-partícula de De Broglie, os elétrons estão em 'orbitais': regiões de máxima probabilidade de localização.",
+                importance: "Modelo atômico atual, fundamental para a química quântica moderna.",
+                svg: `
+                    <svg class="w-40 h-40" viewBox="0 0 100 100">
+                        <defs>
+                            <radialGradient id="cloudGrad" cx="50%" cy="50%" r="50%">
+                                <stop offset="0%" stop-color="#ef4444" stop-opacity="1"/>
+                                <stop offset="20%" stop-color="#86efac" stop-opacity="0.8"/>
+                                <stop offset="60%" stop-color="#22c55e" stop-opacity="0.3"/>
+                                <stop offset="100%" stop-color="#081c15" stop-opacity="0"/>
+                            </radialGradient>
+                        </defs>
+                        <circle cx="50" cy="50" r="42" fill="url(#cloudGrad)"/>
+                        <circle cx="50" cy="50" r="2" fill="#fff"/>
+                    </svg>
+                `
+            }
+        ];
+
+        let currentIntroStep = 0;
+
+        function renderIntroStep() {
+            const data = introData[currentIntroStep];
+            document.getElementById('intro-step-badge').innerText = `Modelo ${currentIntroStep + 1} de ${introData.length}`;
+            document.getElementById('intro-title').innerText = data.title;
+            document.getElementById('intro-nickname').innerText = data.nickname;
+            document.getElementById('intro-description').innerText = data.description;
+            document.getElementById('intro-importance').innerText = data.importance;
+            document.getElementById('intro-svg-container').innerHTML = data.svg;
+
+            // Renderizar bolinhas de progresso
+            const dotsContainer = document.getElementById('intro-dots');
+            dotsContainer.innerHTML = '';
+            introData.forEach((_, idx) => {
+                const dot = document.createElement('div');
+                dot.className = `w-2.5 h-2.5 rounded-full transition-all ${idx === currentIntroStep ? 'bg-brand-400 w-5' : 'bg-brand-card'}`;
+                dotsContainer.appendChild(dot);
+            });
+
+            document.getElementById('intro-prev-btn').disabled = currentIntroStep === 0;
+            const nextBtn = document.getElementById('intro-next-btn');
+            if (currentIntroStep === introData.length - 1) {
+                nextBtn.innerText = "Começar Desafio (Nível 1) 🎯";
+            } else {
+                nextBtn.innerText = "Próximo →";
+            }
+        }
+
+        function nextIntroSlide() {
+            playSound('click');
+            if (currentIntroStep < introData.length - 1) {
+                currentIntroStep++;
+                renderIntroStep();
+            } else {
+                startGame();
+            }
+        }
+
+        function prevIntroSlide() {
+            playSound('click');
+            if (currentIntroStep > 0) {
+                currentIntroStep--;
+                renderIntroStep();
+            }
+        }
+
+        /* -------------------------------------------------------------------------- */
+        /* GERENCIADOR DE TELAS                                                       */
+        /* -------------------------------------------------------------------------- */
+        function switchScreen(screenId) {
+            const screens = ['screen-cover', 'screen-intro', 'screen-game', 'screen-victory'];
+            screens.forEach(id => {
+                const el = document.getElementById(id);
+                if (id === screenId) {
+                    el.classList.remove('hide-screen');
+                    el.classList.add('show-screen');
+                } else {
+                    el.classList.remove('show-screen');
+                    el.classList.add('hide-screen');
+                }
+            });
+        }
+
+        function startIntro() {
+            playSound('click');
+            switchScreen('screen-intro');
+            renderIntroStep();
+        }
+
+        // Suporte à tecla Enter na capa
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') {
+                const coverScreen = document.getElementById('screen-cover');
+                if (coverScreen.classList.contains('show-screen')) {
+                    startIntro();
+                }
+            }
+        });
+
+        /* -------------------------------------------------------------------------- */
+        /* ESTRUTURA DOS 10 NÍVEIS DO JOGO                                            */
+        /* -------------------------------------------------------------------------- */
+        let gameState = {
+            currentLevel: 1,
+            score: 0,
+            attempts: 0,
+            correctAnswers: 0,
+            levelCompleted: false
+        };
+
+        const levelsData = [
+            /* NÍVEL 1: ASSOCIAÇÃO DIRETA NOMES E CONCEITOS */
+            {
+                level: 1,
+                category: "Nível 1: Associação Direta",
+                title: "Ligue o Cientista ao Modelo Atômico Corresponde",
+                type: "matching",
+                pairs: [
+                    { id: 'dalton', name: 'John Dalton', match: 'Bola de Bilhar (Maciço e Indivisível)' },
+                    { id: 'thomson', name: 'J.J. Thomson', match: 'Pudim de Passas (Cargas Negativas)' },
+                    { id: 'rutherford', name: 'Ernest Rutherford', match: 'Sistema Planetário (Núcleo Denso)' },
+                    { id: 'bohr', name: 'Niels Bohr', match: 'Órbitas Quantizadas (Saltos Quânticos)' }
+                ],
+                explanation: "Excelente! Cada cientista marcou uma época: Dalton propôs a esfera maciça, Thomson descobriu os elétrons, Rutherford dividiu o átomo em núcleo/eletrosfera e Bohr organizou em níveis de energia."
+            },
+            /* NÍVEL 2: MÚLTIPLA ESCOLHA - EXPERIMENTOS */
+            {
+                level: 2,
+                category: "Nível 2: Experimentos Científicos",
+                title: "Qual experimento provou a existência do Núcleo Atômico?",
+                type: "mcq",
+                options: [
+                    "Experimento do Tubo de Raios Catódicos de Crookes",
+                    "Bombardeamento de Partículas Alfa na Lâmina de Ouro",
+                    "Experimento da Gota de Óleo de Millikan",
+                    "Análise dos Espectros de Luz do Hidrogênio"
+                ],
+                correct: 1,
+                explanation: "Correto! Rutherford bombardeou uma fina lâmina de ouro com partículas alfa positivas. Como a maioria atravessou e poucas ricochetearam, ele provou que o átomo é quase todo vazio com um núcleo central muito denso e positivo."
+            },
+            /* NÍVEL 3: VERDADEIRO OU FALSO - DALTON E THOMSON */
+            {
+                level: 3,
+                category: "Nível 3: Verdadeiro ou Falso",
+                title: "Avalie os postulados históricos dos Modelos Atômicos:",
+                type: "tf",
+                statements: [
+                    { text: "No modelo de Dalton, átomos de um mesmo elemento químico podem ter massas diferentes.", correct: false, reason: "Para Dalton, todos os átomos do mesmo elemento são idênticos em massa e propriedades." },
+                    { text: "Thomson descobriu a primeira partícula subatômica: o elétron.", correct: true, reason: "Exato! Thomson comprovou a existência de cargas negativas através dos raios catódicos." },
+                    { text: "Tanto Dalton quanto Thomson consideravam o átomo como uma estrutura contínua/maciça.", correct: true, reason: "Correto. Apenas Rutherford introduziu o conceito do átomo descontínuo (espaços vazios)." }
+                ],
+                explanation: "Ótimo raciocínio! Dalton achava o átomo indivisível; Thomson descobriu o elétron mantendo a estrutura preenchida; Rutherford revolucionou com os vazios atômicos."
+            },
+            /* NÍVEL 4: LINHA DO TEMPO / CRONOLOGIA */
+            {
+                level: 4,
+                category: "Nível 4: Cronologia Atômica",
+                title: "Ordene a sequência cronológica de proposição dos Modelos Atômicos:",
+                type: "ordering",
+                items: [
+                    { id: '1', text: "Bola de Bilhar (Dalton) - 1803" },
+                    { id: '2', text: "Pudim de Passas (Thomson) - 1897" },
+                    { id: '3', text: "Modelo Planetário (Rutherford) - 1911" },
+                    { id: '4', text: "Órbitas Quantizadas (Bohr) - 1913" },
+                    { id: '5', text: "Nuvem Eletrônica (Schrödinger) - 1926" }
+                ],
+                explanation: "Perfeito! A ordem cronológica reflete a evolução tecnológica das ferramentas de laboratório ao longo do século XIX e XX."
+            },
+            /* NÍVEL 5: MÚLTIPLA ESCOLHA - FENÔMENOS DE BOHR */
+            {
+                level: 5,
+                category: "Nível 5: Fenômenos do Modelo de Bohr",
+                title: "O brilho colorido dos fogos de artifício é explicado pelo modelo de Bohr porque:",
+                type: "mcq",
+                options: [
+                    "Os prótons no núcleo colidem liberando fótons de luz visível.",
+                    "Elétrons recebem energia, saltam para um nível mais externo e, ao retornar, emitem luz (fóton).",
+                    "Elétrons são destruídos na reação química liberando energia luminosa.",
+                    "O átomo de estrôncio e bário expande seu raio atômico permanentemente."
+                ],
+                correct: 1,
+                explanation: "Exatamente! Quando os sais de metais nos fogos recebem calor, os elétrons saltam para camadas mais externas. Ao retornarem para o estado fundamental, liberam o excesso de energia na forma de luz com cores características!"
+            },
+            /* NÍVEL 6: PREENCHIMENTO DE LACUNAS */
+            {
+                level: 6,
+                category: "Nível 6: Preenchimento de Lacunas",
+                title: "Complete as lacunas sobre a Estrutura Atômica de Rutherford:",
+                type: "fill_blank",
+                textTemplate: "O átomo é dividido em duas regiões: o [BLANK1], que é denso e contém carga [BLANK2], e a [BLANK3], onde os elétrons gravitam.",
+                blanks: [
+                    { id: 'BLANK1', correct: 'núcleo', options: ['núcleo', 'orbital', 'próton'] },
+                    { id: 'BLANK2', correct: 'positiva', options: ['positiva', 'negativa', 'neutra'] },
+                    { id: 'BLANK3', correct: 'eletrosfera', options: ['eletrosfera', 'nuvem', 'órbita'] }
+                ],
+                explanation: "Excelente! O átomo possui um núcleo central pequeno e positivo cercado por uma imensa eletrosfera onde residem os elétrons."
+            },
+            /* NÍVEL 7: IDENTIFICAÇÃO VISUAL DO MODELO */
+            {
+                level: 7,
+                category: "Nível 7: Identificação Visual",
+                title: "Observe o diagrama e selecione a qual modelo atômico ele pertence:",
+                type: "visual_id",
+                svgContent: `
+                    <svg class="w-48 h-48 mx-auto" viewBox="0 0 100 100">
+                        <circle cx="50" cy="50" r="10" fill="#ef4444"/>
+                        <circle cx="50" cy="50" r="22" stroke="#52b788" stroke-width="2" fill="none"/>
+                        <circle cx="50" cy="50" r="38" stroke="#86efac" stroke-width="2" fill="none"/>
+                        <circle cx="72" cy="50" r="4" fill="#facc15"/>
+                        <path d="M 50 28 L 50 12" stroke="#facc15" stroke-dasharray="2,2" stroke-width="2"/>
+                    </svg>
+                `,
+                options: [
+                    "Modelo de Thomson (Pudim de Passas)",
+                    "Modelo de Dalton (Bola de Bilhar)",
+                    "Modelo de Bohr (Níveis Quantizados de Energia)",
+                    "Modelo Quântico (Orbitais Eletrônicos)"
+                ],
+                correct: 2,
+                explanation: "Correto! As órbitas circulares concêntricas bem definidas representando camadas de energia (K, L, M...) são a marca registrada do Modelo de Bohr."
+            },
+            /* NÍVEL 8: VERDADEIRO OU FALSO AVANÇADO - MODELO QUÂNTICO */
+            {
+                level: 8,
+                category: "Nível 8: Física Quântica Atômica",
+                title: "Julgue os itens sobre o Modelo Atômico Atual (Quântico):",
+                type: "tf",
+                statements: [
+                    { text: "No modelo quântico, é possível determinar simultaneamente e com precisão absoluta a posição e a velocidade de um elétron.", correct: false, reason: "Isso violaria o Princípio da Incerteza de Heisenberg!" },
+                    { text: "Um 'orbital' é a região do espaço onde existe a máxima probabilidade de encontrar um elétron.", correct: true, reason: "Exato! Abandonou-se o conceito de órbita circular rígida por regiões de probabilidade." },
+                    { text: "Os subníveis s, p, d, f possuem diferentes formas tridimensionais de nuvem eletrônica.", correct: true, reason: "Correto! O subnível 's' é esférico, enquanto 'p' possui formato de haltere." }
+                ],
+                explanation: "Sensacional! O modelo quântico substituiu a certeza por probabilidades matemáticas descritas pelas equações de onda de Schrödinger."
+            },
+            /* NÍVEL 9: ANÁLISE CRÍTICA / LIMITAÇÕES HISTÓRICAS */
+            {
+                level: 9,
+                category: "Nível 9: Análise Crítica dos Modelos",
+                title: "Por que o modelo de Rutherford precisou ser corrigido por Bohr?",
+                type: "mcq",
+                options: [
+                    "Pela física clássica, elétrons acelerados em órbita perderiam energia emitindo radiação até espiralar e colidir com o núcleo.",
+                    "Rutherford não sabia que os elétrons possuíam carga negativa.",
+                    "O experimento da lâmina de ouro de Rutherford estava experimentalmente errado.",
+                    "O modelo de Rutherford não explicava a existência dos nêutrons descobertos por Thomson."
+                ],
+                correct: 0,
+                explanation: "Perfeito raciocínio! Pelo eletromagnetismo clássico, uma carga negativa girando emitiria ondas eletromagnéticas continuamente, perderia energia e cairia no núcleo em uma fração de segundo. Bohr introduziu os estados estacionários de energia para resolver isso!"
+            },
+            /* NÍVEL 10: QUIZ MESTRE DA QUÍMICA ATÔMICA */
+            {
+                level: 10,
+                category: "Nível 10: Desafio Final Integrado",
+                title: "Desafio do Químico Mestre: Qual das afirmações sintetiza PERFEITAMENTE a evolução dos modelos atômicos?",
+                type: "mcq",
+                options: [
+                    "A ciência atômica evoluiu de uma visão descontínua para um átomo maciço e indivisível.",
+                    "Cada modelo substituiu completamente o anterior sem reaproveitar descobertas como elétrons ou núcleo.",
+                    "A visão do átomo evoluiu de uma esfera maciça indivisível para estruturas eletricamente carregadas, núcleo denso e, finalmente, regiões de probabilidade quântica.",
+                    "Bohr provou que os átomos de Dalton estavam errados quanto à existência de elementos químicos."
+                ],
+                correct: 2,
+                explanation: "PARABÉNS! Você dominou completamente a evolução dos modelos atômicos! A ciência avança construindo sobre descobertas anteriores: da esfera indivisível às nuvens de probabilidade quântica!"
+            }
+        ];
+
+        /* -------------------------------------------------------------------------- */
+        /* SISTEMA E RENDERIZAÇÃO DOS NÍVEIS                                          */
+        /* -------------------------------------------------------------------------- */
+        function startGame() {
+            gameState.currentLevel = 1;
+            gameState.score = 0;
+            gameState.attempts = 0;
+            document.getElementById('game-dashboard').classList.remove('hidden');
+            switchScreen('screen-game');
+            updateDashboard();
+            renderLevel();
+        }
+
+        function updateDashboard() {
+            document.getElementById('score-display').innerText = gameState.score;
+            document.getElementById('level-display').innerText = `${gameState.currentLevel}/10`;
+            const progressPct = (gameState.currentLevel / 10) * 100;
+            document.getElementById('level-progress-bar').style.width = `${progressPct}%`;
+        }
+
+        function renderLevel() {
+            gameState.levelCompleted = false;
+            document.getElementById('feedback-panel').classList.add('hidden');
+            
+            const levelData = levelsData[gameState.currentLevel - 1];
+            document.getElementById('game-level-category').innerText = levelData.category;
+            document.getElementById('game-level-title').innerText = levelData.title;
+
+            const container = document.getElementById('level-container');
+            container.innerHTML = '';
+
+            // Injetar interface de acordo com o tipo do nível
+            switch(levelData.type) {
+                case 'matching':
+                    renderMatchingLevel(container, levelData);
+                    break;
+                case 'mcq':
+                    renderMCQLevel(container, levelData);
+                    break;
+                case 'tf':
+                    renderTFLevel(container, levelData);
+                    break;
+                case 'ordering':
+                    renderOrderingLevel(container, levelData);
+                    break;
+                case 'fill_blank':
+                    renderFillBlankLevel(container, levelData);
+                    break;
+                case 'visual_id':
+                    renderVisualIDLevel(container, levelData);
+                    break;
+            }
+        }
+
+        /* --- RENDERIZADORES ESPECÍFICOS DE NÍVEIS --- */
+
+        // Nível 1: Associação
+        let selectedName = null;
+        let selectedMatch = null;
+        let matchesFound = 0;
+
+        function renderMatchingLevel(container, data) {
+            matchesFound = 0;
+            selectedName = null;
+            selectedMatch = null;
+
+            const grid = document.createElement('div');
+            grid.className = "grid grid-cols-1 md:grid-cols-2 gap-4 my-2";
+
+            const leftCol = document.createElement('div');
+            leftCol.className = "space-y-3";
+            
+            const rightCol = document.createElement('div');
+            rightCol.className = "space-y-3";
+
+            // Embaralhar respostas do lado direito
+            const shuffledMatches = [...data.pairs].sort(() => Math.random() - 0.5);
+
+            data.pairs.forEach(pair => {
+                const btn = document.createElement('button');
+                btn.className = `matching-left-btn w-full p-3.5 text-left rounded-xl bg-brand-dark/80 border border-brand-accent/30 text-white hover:bg-brand-card transition text-sm font-semibold`;
+                btn.dataset.id = pair.id;
+                btn.innerText = `👨‍🔬 ${pair.name}`;
+                btn.onclick = () => selectLeftMatch(btn, pair.id);
+                leftCol.appendChild(btn);
+            });
+
+            shuffledMatches.forEach(pair => {
+                const btn = document.createElement('button');
+                btn.className = `matching-right-btn w-full p-3.5 text-left rounded-xl bg-brand-dark/80 border border-brand-accent/30 text-gray-200 hover:bg-brand-card transition text-sm`;
+                btn.dataset.id = pair.id;
+                btn.innerText = `⚛️ ${pair.match}`;
+                btn.onclick = () => selectRightMatch(btn, pair.id);
+                rightCol.appendChild(btn);
+            });
+
+            grid.appendChild(leftCol);
+            grid.appendChild(rightCol);
+            container.appendChild(grid);
+        }
+
+        function selectLeftMatch(btn, id) {
+            if (btn.classList.contains('matched')) return;
+            playSound('click');
+            document.querySelectorAll('.matching-left-btn').forEach(b => {
+                if(!b.classList.contains('matched')) b.classList.remove('border-brand-400', 'bg-brand-accent/20');
+            });
+            btn.classList.add('border-brand-400', 'bg-brand-accent/20');
+            selectedName = id;
+            checkMatchPair();
+        }
+
+        function selectRightMatch(btn, id) {
+            if (btn.classList.contains('matched')) return;
+            playSound('click');
+            document.querySelectorAll('.matching-right-btn').forEach(b => {
+                if(!b.classList.contains('matched')) b.classList.remove('border-brand-400', 'bg-brand-accent/20');
+            });
+            btn.classList.add('border-brand-400', 'bg-brand-accent/20');
+            selectedMatch = id;
+            checkMatchPair();
+        }
+
+        function checkMatchPair() {
+            if (selectedName && selectedMatch) {
+                if (selectedName === selectedMatch) {
+                    playSound('correct');
+                    // Marcar como acertado
+                    const left = document.querySelector(`.matching-left-btn[data-id="${selectedName}"]`);
+                    const right = document.querySelector(`.matching-right-btn[data-id="${selectedMatch}"]`);
+                    [left, right].forEach(el => {
+                        el.classList.add('matched', 'bg-brand-900/80', 'border-brand-500', 'text-brand-300');
+                        el.disabled = true;
+                    });
+                    matchesFound++;
+                    if (matchesFound === 4) {
+                        completeLevel(true);
+                    }
+                } else {
+                    playSound('wrong');
+                    // Piscar erro
+                    const left = document.querySelector(`.matching-left-btn[data-id="${selectedName}"]`);
+                    const right = document.querySelector(`.matching-right-btn[data-id="${selectedMatch}"]`);
+                    [left, right].forEach(el => el.classList.add('border-red-500', 'bg-red-950/40'));
+                    setTimeout(() => {
+                        [left, right].forEach(el => {
+                            if(!el.classList.contains('matched')) {
+                                el.classList.remove('border-red-500', 'bg-red-950/40', 'border-brand-400', 'bg-brand-accent/20');
+                            }
+                        });
+                    }, 800);
+                }
+                selectedName = null;
+                selectedMatch = null;
+            }
+        }
+
+        // Nível 2, 5, 9, 10: Múltipla Escolha
+        function renderMCQLevel(container, data) {
+            const optionsDiv = document.createElement('div');
+            optionsDiv.className = "space-y-3 my-2";
+
+            data.options.forEach((opt, idx) => {
+                const btn = document.createElement('button');
+                btn.className = "w-full p-4 text-left rounded-2xl bg-brand-dark/80 border border-brand-accent/30 text-white hover:bg-brand-card hover:border-brand-accent transition text-sm font-medium flex items-center justify-between";
+                btn.innerHTML = `<span>${opt}</span> <span class="text-xs px-2.5 py-1 bg-brand-card rounded-lg text-brand-300">Opção ${idx + 1}</span>`;
+                btn.onclick = () => checkMCQAnswer(idx, data.correct);
+                optionsDiv.appendChild(btn);
+            });
+
+            container.appendChild(optionsDiv);
+        }
+
+        function checkMCQAnswer(selected, correct) {
+            if (gameState.levelCompleted) return;
+            if (selected === correct) {
+                playSound('correct');
+                completeLevel(true);
+            } else {
+                playSound('wrong');
+                showFeedback(false, "Resposta Incorreta. Tente analisar as características específicas do experimento ou postulado!");
+            }
+        }
+
+        // Nível 3 & 8: Verdadeiro ou Falso
+        let tfAnswers = {};
+
+        function renderTFLevel(container, data) {
+            tfAnswers = {};
+            const wrapper = document.createElement('div');
+            wrapper.className = "space-y-4 my-2";
+
+            data.statements.forEach((stmt, idx) => {
+                const card = document.createElement('div');
+                card.className = "p-4 rounded-2xl bg-brand-dark/80 border border-brand-accent/20 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3";
+                
+                const txt = document.createElement('p');
+                txt.className = "text-sm text-gray-200 flex-grow";
+                txt.innerText = `${idx + 1}. ${stmt.text}`;
+
+                const btnGroup = document.createElement('div');
+                btnGroup.className = "flex gap-2 shrink-0";
+
+                const vBtn = document.createElement('button');
+                vBtn.className = `tf-btn-${idx}-v px-4 py-2 rounded-xl bg-brand-card border border-brand-accent/30 text-xs font-bold text-white hover:bg-brand-500 hover:text-brand-dark transition`;
+                vBtn.innerText = "Verdadeiro (V)";
+                vBtn.onclick = () => selectTF(idx, true, vBtn, fBtn);
+
+                const fBtn = document.createElement('button');
+                fBtn.className = `tf-btn-${idx}-f px-4 py-2 rounded-xl bg-brand-card border border-brand-accent/30 text-xs font-bold text-white hover:bg-red-500 hover:text-white transition`;
+                fBtn.innerText = "Falso (F)";
+                fBtn.onclick = () => selectTF(idx, false, fBtn, vBtn);
+
+                btnGroup.appendChild(vBtn);
+                btnGroup.appendChild(fBtn);
+                card.appendChild(txt);
+                card.appendChild(btnGroup);
+                wrapper.appendChild(card);
+            });
+
+            const submitBtn = document.createElement('button');
+            submitBtn.className = "w-full mt-4 py-3 bg-brand-500 hover:bg-brand-400 text-brand-dark font-extrabold rounded-xl shadow transition text-sm";
+            submitBtn.innerText = "Verificar Respostas V/F";
+            submitBtn.onclick = () => checkTFAnswers(data);
+            wrapper.appendChild(submitBtn);
+
+            container.appendChild(wrapper);
+        }
+
+        function selectTF(index, value, activeBtn, inactiveBtn) {
+            playSound('click');
+            tfAnswers[index] = value;
+            activeBtn.classList.add('bg-brand-accent', 'text-brand-dark', 'border-brand-300');
+            inactiveBtn.classList.remove('bg-brand-accent', 'text-brand-dark', 'border-brand-300');
+        }
+
+        function checkTFAnswers(data) {
+            if (Object.keys(tfAnswers).length < data.statements.length) {
+                alert("Por favor, responda se cada afirmação é Verdadeira ou Falsa!");
+                return;
+            }
+
+            let allCorrect = true;
+            data.statements.forEach((stmt, idx) => {
+                if (tfAnswers[idx] !== stmt.correct) {
+                    allCorrect = false;
+                }
+            });
+
+            if (allCorrect) {
+                playSound('correct');
+                completeLevel(true);
+            } else {
+                playSound('wrong');
+                showFeedback(false, "Alguma das suas escolhas V/F está incorreta. Revise os postulados e tente novamente!");
+            }
+        }
+
+        // Nível 4: Ordenação / Linha do Tempo
+        let currentOrder = [];
+
+        function renderOrderingLevel(container, data) {
+            currentOrder = [...data.items].sort(() => Math.random() - 0.5);
+            
+            const listContainer = document.createElement('div');
+            listContainer.className = "space-y-2 my-2";
+            listContainer.id = "ordering-list";
+
+            renderOrderItems(listContainer);
+
+            const submitBtn = document.createElement('button');
+            submitBtn.className = "w-full mt-4 py-3 bg-brand-500 hover:bg-brand-400 text-brand-dark font-extrabold rounded-xl shadow transition text-sm";
+            submitBtn.innerText = "Validar Cronologia";
+            submitBtn.onclick = () => checkOrdering(data);
+
+            container.appendChild(listContainer);
+            container.appendChild(submitBtn);
+        }
+
+        function renderOrderItems(listContainer) {
+            listContainer.innerHTML = '';
+            currentOrder.forEach((item, idx) => {
+                const card = document.createElement('div');
+                card.className = "p-3.5 rounded-xl bg-brand-dark/80 border border-brand-accent/30 text-white flex justify-between items-center text-sm";
+                card.innerHTML = `
+                    <div class="flex items-center gap-3">
+                        <span class="w-6 h-6 rounded-full bg-brand-accent/20 border border-brand-accent/40 flex items-center justify-center text-xs font-bold text-brand-300">${idx + 1}</span>
+                        <span>${item.text}</span>
+                    </div>
+                    <div class="flex gap-1">
+                        <button onclick="moveOrder(${idx}, -1)" class="p-1.5 rounded bg-brand-card hover:bg-brand-accent/30 text-xs" ${idx === 0 ? 'disabled opacity-30' : ''}>⬆️</button>
+                        <button onclick="moveOrder(${idx}, 1)" class="p-1.5 rounded bg-brand-card hover:bg-brand-accent/30 text-xs" ${idx === currentOrder.length - 1 ? 'disabled opacity-30' : ''}>⬇️</button>
+                    </div>
+                `;
+                listContainer.appendChild(card);
+            });
+        }
+
+        function moveOrder(index, direction) {
+            playSound('click');
+            const target = index + direction;
+            if (target >= 0 && target < currentOrder.length) {
+                const temp = currentOrder[index];
+                currentOrder[index] = currentOrder[target];
+                currentOrder[target] = temp;
+                renderOrderItems(document.getElementById('ordering-list'));
+            }
+        }
+
+        function checkOrdering(data) {
+            let isCorrect = true;
+            for (let i = 0; i < currentOrder.length; i++) {
+                if (currentOrder[i].id !== (i + 1).toString()) {
+                    isCorrect = false;
+                    break;
+                }
+            }
+
+            if (isCorrect) {
+                playSound('correct');
+                completeLevel(true);
+            } else {
+                playSound('wrong');
+                showFeedback(false, "A ordem cronológica ainda não está correta. Lembre-se: Dalton (1803) → Thomson (1897) → Rutherford (1911) → Bohr (1913) → Schrödinger (1926).");
+            }
+        }
+
+        // Nível 6: Preenchimento de Lacunas
+        let selectedBlanks = {};
+
+        function renderFillBlankLevel(container, data) {
+            selectedBlanks = {};
+            const wrapper = document.createElement('div');
+            wrapper.className = "space-y-6 my-2 text-center";
+
+            const sentenceBox = document.createElement('div');
+            sentenceBox.className = "p-6 rounded-2xl bg-brand-dark/90 border border-brand-accent/30 text-base sm:text-lg leading-relaxed text-white";
+            
+            // Injetar selects no texto
+            let htmlText = data.textTemplate;
+            data.blanks.forEach(b => {
+                const selectHtml = `
+                    <select id="select-${b.id}" onchange="selectBlank('${b.id}', this.value)" class="mx-1 px-3 py-1.5 rounded-lg bg-brand-card border border-brand-accent text-brand-300 font-bold text-sm focus:outline-none">
+                        <option value="">[ Escolha ]</option>
+                        ${b.options.sort(() => Math.random() - 0.5).map(o => `<option value="${o}">${o}</option>`).join('')}
+                    </select>
+                `;
+                htmlText = htmlText.replace(`[${b.id}]`, selectHtml);
+            });
+
+            sentenceBox.innerHTML = htmlText;
+            wrapper.appendChild(sentenceBox);
+
+            const submitBtn = document.createElement('button');
+            submitBtn.className = "w-full py-3 bg-brand-500 hover:bg-brand-400 text-brand-dark font-extrabold rounded-xl shadow transition text-sm";
+            submitBtn.innerText = "Confirmar Lacunas";
+            submitBtn.onclick = () => checkFillBlanks(data);
+            wrapper.appendChild(submitBtn);
+
+            container.appendChild(wrapper);
+        }
+
+        function selectBlank(id, val) {
+            playSound('click');
+            selectedBlanks[id] = val;
+        }
+
+        function checkFillBlanks(data) {
+            let allCorrect = true;
+            data.blanks.forEach(b => {
+                if (selectedBlanks[b.id] !== b.correct) {
+                    allCorrect = false;
+                }
+            });
+
+            if (allCorrect) {
+                playSound('correct');
+                completeLevel(true);
+            } else {
+                playSound('wrong');
+                showFeedback(false, "Algumas lacunas estão incorretas ou em branco. Lembre-se: o átomo possui núcleo positivo e eletrosfera!");
+            }
+        }
+
+        // Nível 7: Identificação Visual
+        function renderVisualIDLevel(container, data) {
+            const wrapper = document.createElement('div');
+            wrapper.className = "space-y-4 my-2 text-center";
+
+            const svgCard = document.createElement('div');
+            svgCard.className = "p-4 rounded-2xl bg-brand-dark/90 border border-brand-accent/30 flex items-center justify-center";
+            svgCard.innerHTML = data.svgContent;
+
+            const optionsDiv = document.createElement('div');
+            optionsDiv.className = "grid grid-cols-1 sm:grid-cols-2 gap-3";
+
+            data.options.forEach((opt, idx) => {
+                const btn = document.createElement('button');
+                btn.className = "p-3.5 text-left rounded-xl bg-brand-dark/80 border border-brand-accent/30 text-white hover:bg-brand-card transition text-sm font-medium";
+                btn.innerText = opt;
+                btn.onclick = () => checkMCQAnswer(idx, data.correct);
+                optionsDiv.appendChild(btn);
+            });
+
+            wrapper.appendChild(svgCard);
+            wrapper.appendChild(optionsDiv);
+            container.appendChild(wrapper);
+        }
+
+        /* -------------------------------------------------------------------------- */
+        /* CONCLUSÃO DE NÍVEL E FEEDBACK                                              */
+        /* -------------------------------------------------------------------------- */
+        function completeLevel(success) {
+            gameState.levelCompleted = true;
+            if (success) {
+                gameState.score += 100;
+                updateDashboard();
+                showFeedback(true, levelsData[gameState.currentLevel - 1].explanation);
+            }
+        }
+
+        function showFeedback(isSuccess, message) {
+            const panel = document.getElementById('feedback-panel');
+            const icon = document.getElementById('feedback-icon');
+            const title = document.getElementById('feedback-title');
+            const text = document.getElementById('feedback-text');
+            const nextBtn = document.getElementById('next-level-btn');
+
+            panel.classList.remove('hidden', 'bg-red-950/60', 'border-red-500/50', 'bg-brand-dark/90', 'border-brand-accent/50');
+
+            if (isSuccess) {
+                panel.classList.add('bg-brand-dark/90', 'border-brand-accent/50');
+                icon.innerText = "🎉";
+                title.innerText = "Excelente! Resposta Correta!";
+                title.className = "font-bold text-base text-brand-300";
+                text.innerText = message;
+                nextBtn.classList.remove('hidden');
+            } else {
+                panel.classList.add('bg-red-950/60', 'border-red-500/50');
+                icon.innerText = "❌";
+                title.innerText = "Ainda não está certo...";
+                title.className = "font-bold text-base text-red-400";
+                text.innerText = message;
+                nextBtn.classList.add('hidden');
+            }
+        }
+
+        function advanceLevel() {
+            playSound('click');
+            if (gameState.currentLevel < 10) {
+                gameState.currentLevel++;
+                updateDashboard();
+                renderLevel();
+            } else {
+                finishGame();
+            }
+        }
+
+        function finishGame() {
+            playSound('win');
+            switchScreen('screen-victory');
+            document.getElementById('final-score').innerText = gameState.score;
+            document.getElementById('final-accuracy').innerText = "100%";
+        }
+
+        function restartGame() {
+            playSound('click');
+            switchScreen('screen-cover');
+            document.getElementById('game-dashboard').classList.add('hidden');
+        }
+    </script>
+</body>
+</html>
